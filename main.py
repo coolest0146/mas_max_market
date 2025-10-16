@@ -9,6 +9,12 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+
+
+@app.get("/")
+def root():
+    return {"message": "FastAPI + Supabase app deployed successfully 🚀"}
+
 app.include_router(router=auth.USERS)
 app.include_router(router=orders.orders)
 app.include_router(router=product.product)
