@@ -7,7 +7,7 @@ USERS=APIRouter(tags=["users"])
 
 @USERS.post("/login",response_model=schemas.Token)
 def login(user_data:schemas.UserLogin,db=Depends(get_db)):
-    user=db.query(models.User).filter(user_data.useremail == models.User.useremail).first()
+    user=db.query(models.User).filter(models.User.useremail==user_data.useremail ).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Invalid Credentials")
     if not auth.password_verify(user_data.password,user.password):
