@@ -5,11 +5,11 @@ from sqlalchemy.orm import sessionmaker
 import os 
 from dotenv import load_dotenv
 # Update with your MySQL credentials
-DATABASE_URL =os.getenv("DATABASE_URL")
+# DATABASE_URL =os.getenv("DATABASE_URL")
 
 
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine("mysql+pymysql://root:root@localhost:3306/MasmaxNexus")
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
