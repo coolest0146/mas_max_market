@@ -1,7 +1,8 @@
 from datetime import datetime
+import uuid
 from sqlalchemy import (
     Column, String, Integer, BigInteger, DECIMAL, Text, ForeignKey,
-    DateTime, Enum, Boolean, CHAR
+    DateTime, Enum, Boolean, CHAR,JSON
 )
 from sqlalchemy.orm import relationship, DeclarativeBase
 from database_conn import Base
@@ -44,7 +45,7 @@ class UserProfile(Base):
     user = relationship("User", back_populates="profile")
 
 
-# ---------------- CATEGORIES -----------------
+# ---------------- CATEGORIES/changed to service ----------------
 class Category(Base):
     __tablename__ = "categories"
 
@@ -70,17 +71,24 @@ class Product(Base):
     slug = Column(String(180), unique=True, nullable=False)
     sku = Column(String(64), unique=True, nullable=False)
     description = Column(Text)
-    price = Column(DECIMAL(12, 2), nullable=False)
-    cost_price = Column(DECIMAL(12, 2), default=0.00)
+    price_cents = Column(Integer, nullable=False)                    
+    rating_stars = Column(DECIMAL(3, 1), default=0.0, nullable=False) 
+    rating_count = Column(Integer, default=0, nullable=False)         
+    type = Column(String(60))                                        
+    keywords = Column(JSON, default=list)                            
+    size_chart_link = Column(String(255))                             
     is_active = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.now(), nullable=False)
-    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now(), nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
 
+    # Relationships
     category = relationship("Category", back_populates="products")
-    images = relationship("ProductImage", back_populates="product")
+    images = relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")
+    variations = relationship("ProductVariation", back_populates="product", cascade="all, delete-orphan")
     stock = relationship("InventoryStock", back_populates="product", uselist=False)
 
 
+# ---------------- PRODUCT IMAGES -----------------
 class ProductImage(Base):
     __tablename__ = "product_images"
 
@@ -89,54 +97,22 @@ class ProductImage(Base):
     image_url = Column(String(255), nullable=False)
     is_primary = Column(Boolean, default=False, nullable=False)
     sort_order = Column(Integer, default=0, nullable=False)
-    created_at = Column(DateTime, default=datetime.now(), nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
 
     product = relationship("Product", back_populates="images")
 
 
-# ---------------- INVENTORY -----------------
-class InventoryLocation(Base):
-    __tablename__ = "inventory_locations"
-
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    name = Column(String(120), nullable=False)
-    code = Column(String(32), unique=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.now(), nullable=False)
-
-
-class InventoryMovement(Base):
-    __tablename__ = "inventory_movements"
+# ---------------- PRODUCT VARIATIONS -----------------
+class ProductVariation(Base):
+    __tablename__ = "product_variations"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     product_id = Column(BigInteger, ForeignKey("products.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
-    location_id = Column(BigInteger, ForeignKey("inventory_locations.id", onupdate="CASCADE", ondelete="SET NULL"))
-    movement_type = Column(Enum("in", "out", "adjust", name="movement_type"), nullable=False)
-    quantity = Column(Integer, nullable=False)
-    reason = Column(String(160))
-    ref_type = Column(String(60))
-    ref_id = Column(BigInteger)
-    created_at = Column(DateTime, default=datetime.now(), nullable=False)
+    variation_uuid = Column(String(36), default=lambda: str(uuid.uuid4()), nullable=False, unique=True)
+    image_url= Column(String(255), nullable=False)                    # image path
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
 
-
-class InventoryStock(Base):
-    __tablename__ = "inventory_stock"
-
-    product_id = Column(BigInteger, ForeignKey("products.id", onupdate="CASCADE", ondelete="CASCADE"), primary_key=True)
-    qty_on_hand = Column(Integer, default=0, nullable=False)
-    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now(), nullable=False)
-
-    product = relationship("Product", back_populates="stock")
-
-
-class InventoryMonthlySnapshot(Base):
-    __tablename__ = "inventory_monthly_snapshot"
-
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
-    product_id = Column(BigInteger, ForeignKey("products.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
-    month_key = Column(CHAR(7), nullable=False)
-    closing_stock = Column(Integer, nullable=False)
-    monthly_units_sold = Column(Integer, default=0, nullable=False)
-    created_at = Column(DateTime, default=datetime.now(), nullable=False)
+    product = relationship("Product", back_populates="variations")
 
 
 # ---------------- ORDERS -----------------
@@ -150,10 +126,8 @@ class Order(Base):
     shipping_fee = Column(DECIMAL(12, 2), default=0.00, nullable=False)
     discount_total = Column(DECIMAL(12, 2), default=0.00, nullable=False)
     total = Column(DECIMAL(12, 2), nullable=False)
-    status = Column(Enum("pending", "paid", "shipped", "delivered", "cancelled", "refunded", name="order_status"),
-                    default="pending", nullable=False)
-    payment_status = Column(Enum("unpaid", "paid", "refunded", "failed", name="payment_status"),
-                            default="unpaid", nullable=False)
+    status = Column(Enum("pending", "paid", "shipped", "delivered", "cancelled", "refunded", name="order_status"),default="pending", nullable=False)
+    payment_status = Column(Enum("unpaid", "paid", "refunded", "failed", name="payment_status"),default="unpaid", nullable=False)
     notes = Column(String(255))
     created_at = Column(DateTime, default=datetime.now(), nullable=False)
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now(), nullable=False)
@@ -174,7 +148,6 @@ class OrderItem(Base):
     unit_price = Column(DECIMAL(12, 2), nullable=False)
     subtotal = Column(DECIMAL(12, 2), nullable=False)
     created_at = Column(DateTime, default=datetime.now(), nullable=False)
-
     order = relationship("Order", back_populates="items")
 
 
@@ -202,8 +175,7 @@ class Shipment(Base):
     order_id = Column(BigInteger, ForeignKey("orders.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
     carrier = Column(String(60))
     tracking_no = Column(String(100))
-    status = Column(Enum("pending", "in_transit", "delivered", "failed", name="shipment_status"),
-                    default="pending", nullable=False)
+    status = Column(Enum("pending", "in_transit", "delivered", "failed", name="shipment_status"),default="pending", nullable=False)
     shipped_at = Column(DateTime)
     delivered_at = Column(DateTime)
     created_at = Column(DateTime, default=datetime.now(), nullable=False)
@@ -305,4 +277,46 @@ class AuditLog(Base):
     actor_user = relationship("User")
 
 
-    
+    # ---------------- INVENTORY -----------------
+class InventoryLocation(Base):
+    __tablename__ = "inventory_locations"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    name = Column(String(120), nullable=False)
+    code = Column(String(32), unique=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.now(), nullable=False)
+
+
+class InventoryMovement(Base):
+    __tablename__ = "inventory_movements"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    product_id = Column(BigInteger, ForeignKey("products.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+    location_id = Column(BigInteger, ForeignKey("inventory_locations.id", onupdate="CASCADE", ondelete="SET NULL"))
+    movement_type = Column(Enum("in", "out", "adjust", name="movement_type"), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    reason = Column(String(160))
+    ref_type = Column(String(60))
+    ref_id = Column(BigInteger)
+    created_at = Column(DateTime, default=datetime.now(), nullable=False)
+
+
+class InventoryStock(Base):
+    __tablename__ = "inventory_stock"
+
+    product_id = Column(BigInteger, ForeignKey("products.id", onupdate="CASCADE", ondelete="CASCADE"), primary_key=True)
+    qty_on_hand = Column(Integer, default=0, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now(), nullable=False)
+
+    product = relationship("Product", back_populates="stock")
+
+
+class InventoryMonthlySnapshot(Base):
+    __tablename__ = "inventory_monthly_snapshot"
+
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    product_id = Column(BigInteger, ForeignKey("products.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+    month_key = Column(CHAR(7), nullable=False)
+    closing_stock = Column(Integer, nullable=False)
+    monthly_units_sold = Column(Integer, default=0, nullable=False)
+    created_at = Column(DateTime, default=datetime.now(), nullable=False)

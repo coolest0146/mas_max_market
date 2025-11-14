@@ -7,7 +7,7 @@ import database_conn, models
 
 SECRET_KEY = "7c2455d8da5cccf9dde56097a7faade86ffca998d45f918449bfc46302f13628"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRATION_MINUTES = 12
+ACCESS_TOKEN_EXPIRATION_MINUTES = 1440
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
