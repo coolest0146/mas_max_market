@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from database_conn import  engine ,get_db
 import models ,schemas ,oath2 
 from pydantic import BaseModel
-from routes import auth ,product,category
+from routes import auth ,product,category,order, service
 # Create the tables in MySQL if not exists
 models.Base.metadata.create_all(bind=engine)
 
@@ -18,4 +18,6 @@ def root():
 app.include_router(router=auth.USERS)
 app.include_router(router=product.product)
 app.include_router(router=category.Categories)
+app.include_router(router=order.order)
+app.include_router(router=service.service)
 

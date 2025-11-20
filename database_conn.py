@@ -3,13 +3,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os 
+from supabase import create_client
 from dotenv import load_dotenv
 # Update with your MySQL credentials
-# DATABASE_URL =os.getenv("DATABASE_URL")
+load_dotenv()
+DATABASE_URL =os.getenv("DATABASE_URL")
 
-
-
-engine = create_engine("mysql+pymysql://root:root@localhost:3306/MasmaxNexus")
+engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

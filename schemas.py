@@ -153,7 +153,7 @@ class OrderItemCreate(BaseModel):
     price: float
     quantity: int
     varid: str
-    product_id:str
+    product_id:int
 
 class OrderCreate(BaseModel):
     Customer: str
@@ -164,11 +164,9 @@ class OrderCreate(BaseModel):
     total:str
 
 class OrderResponse(BaseModel):
-    id: int
-    order_uuid: str
-    customer: str
-    payment_method: str
-    payment_number: str
+    order_no:str
+    total:float
+    user_id:int
 
     class Config:
         orm_mode = True
@@ -224,3 +222,34 @@ class AuditLogOut(AuditLogBase):
     class Config:
         from_attributes = True
 
+
+
+class CNCResponse(BaseModel):
+    id: int
+    Quantity: int
+    Material: str
+    Insert: bool
+    Threads_and_Tapped_holes: bool
+    Tolerance: bool
+    PartMarking: str
+    PartAssembly: str
+    Finished_appearance: str
+    Inspection: str
+    Technical_drawing_File: str
+
+    class Config:
+        orm_mode = True
+
+class CNCcreate(BaseModel):
+  Quantity:int
+  MachineType:str
+  Material:str
+  Insert: bool
+  Marking: str
+  Tolerance:bool
+  Threads: bool
+  Assembly: str
+  Finishing: str
+  Inspection: str
+  uri:str
+  
