@@ -21,9 +21,9 @@ def create_category(payload: CategoryCreate, db: Session = Depends(get_db)):
     return category
 
 
-@Categories.get("/read", response_model=CategoryResponse)
-def create_category(db: Session = Depends(get_db)):
+@Categories.get("/read")
+def read_category(db: Session = Depends(get_db)):
     # Check if category already exists
     existing = db.query(Category).all()
     if existing:
-        return [existing]
+        return existing

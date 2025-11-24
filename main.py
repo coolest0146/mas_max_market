@@ -4,11 +4,19 @@ from database_conn import  engine ,get_db
 import models ,schemas ,oath2 
 from pydantic import BaseModel
 from routes import auth ,product,category,order, service
+from fastapi.middleware.cors import CORSMiddleware
 # Create the tables in MySQL if not exists
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
