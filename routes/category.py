@@ -14,8 +14,16 @@ def create_category(payload: CategoryCreate, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="Category with this slug already exists")
 
-    category = Category(**payload.dict())
+    category = Category(**payload.model_dump())
     db.add(category)
     db.commit()
     db.refresh(category)
     return category
+
+
+@Categories.get("/read", response_model=CategoryResponse)
+def create_category(db: Session = Depends(get_db)):
+    # Check if category already exists
+    existing = db.query(Category).all()
+    if existing:
+        return [existing]
