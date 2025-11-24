@@ -1,33 +1,92 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, FastAPI, HTTPException, UploadFile, File, Form, Depends
 from sqlalchemy.orm import Session
-from database_conn import get_db
-from models import Product, ProductImage, ProductVariation
+from uuid import uuid4
+from supabase import create_client, Client
+from models import Product, ProductImage, ProductVariation  # your SQLAlchemy models
+from database_conn import get_db  # your DB session dependency
+from datetime import datetime
 from schemas import ProductCreate, ProductResponse
 from sqlalchemy.orm import joinedload
 product = APIRouter(prefix="/products", tags=["Products"])
 
+SUPABASE_URL = "https://snhcsqjxriwrztyrkejc.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuaGNzcWp4cml3cnp0eXJrZWpjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MDUwMzQ1MSwiZXhwIjoyMDc2MDc5NDUxfQ.7KNqimmEo0Y837bLWskA54SPbkjFRPxBuxqqyjuZXHM"
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+BUCKET = "Files_technical"
 
-@product.post("/create", response_model=ProductResponse)
-def create_product(payload: ProductCreate, db: Session = Depends(get_db)):
-    product = Product(**payload.model_dump(exclude={"images", "variations"}))
-    db.add(product)
-    db.commit()
-    db.refresh(product)
+@product.post("/create")
+async def create_product_endpoint(
+    name: str = Form(...),
+    slug: str = Form(...),
+    description: str = Form(...),
+    category_id: int = Form(...),
+    price_cents: int = Form(...),
+    primary_image: UploadFile = File(...),
+    variations: list[UploadFile] = File(default=[]),
+    db: Session = Depends(get_db),
+):
+    try:
+        #Upload primary image to Supabase
+        primary_ext = primary_image.filename.split(".")[-1]
+        primary_filename = f"products/{uuid4()}.{primary_ext}"
+        primary_content = await primary_image.read()
+        supabase.storage.from_(BUCKET).upload(primary_filename, primary_content)
+        primary_url = f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET}/{primary_filename}"
 
-    # add images
-    if payload.images:
-        for img in payload.images:
-            product.images.append(ProductImage(**img.model_dump()))
+        #Upload variation images
+        variation_urls = []
+        for v in variations:
+            ext = v.filename.split(".")[-1]
+            filename = f"products/{uuid4()}.{ext}"
+            content = await v.read()
+            supabase.storage.from_(BUCKET).upload(filename, content)
+            variation_urls.append(f"{SUPABASE_URL}/storage/v1/object/public/{BUCKET}/{filename}")
 
-    # add variations
-    if payload.variations:
-        for var in payload.variations:
-            product.variations.append(ProductVariation(**var.model_dump()))
+        #Create Product in DB
+        product = Product(
+            name=name,
+            slug=slug,
+            description=description,
+            category_id=category_id,
+            price_cents=price_cents,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        )
+        db.add(product)
+        db.commit()
+        db.refresh(product)
 
-    db.commit()
-    db.refresh(product)
-    return product
+        #Add primary image
+        product_image = ProductImage(
+            product_id=product.id,
+            image_url=primary_url,
+            is_primary=True,
+            sort_order=1,
+        )
+        db.add(product_image)
+
+        #Add variations
+        for url in variation_urls:
+            product_variation = ProductVariation(
+                product_id=product.id,
+                image_url=url,
+            )
+            db.add(product_variation)
+
+        db.commit()
+        db.refresh(product)
+
+        return {
+            "message": "Product created successfully",
+            "product_id": product.id,
+            "primary_image": primary_url,
+            "variations": variation_urls,
+        }
+
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
 
 
 @product.get("/product/{product_id}", response_model=ProductResponse)
