@@ -149,7 +149,7 @@ class OrderItem(Base):
     quantity = Column(Integer, nullable=False)
     unit_price = Column(DECIMAL(12, 2), nullable=False)
     subtotal = Column(DECIMAL(12, 2), nullable=False)
-    image=Column(COMMON_STRING)
+    image=Column(String(COMMON_STRING))
     item_name=Column(String(100))
     created_at = Column(DateTime, default=datetime.now(), nullable=False)
     order = relationship("Order", back_populates="items")
