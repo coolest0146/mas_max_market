@@ -32,7 +32,9 @@ def create_order(order: OrderCreate, db: Session = Depends(get_db),user_id:int=D
                 product_id=item.product_id,
                 unit_price=item.price,
                 subtotal=(item.quantity)*(item.price),
-                quantity=item.quantity
+                quantity=item.quantity,
+                image=item.image,
+                item_name=item.name
             )
             db.add(order_item)
 
