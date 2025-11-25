@@ -4,9 +4,11 @@ from typing import List, Optional
 
 class OrderItemSchema(BaseModel):
     id: int
+    item_name:str
     product_id: int
     variation_id: str
     quantity: int
+    image:str
     unit_price: float
     subtotal: float
     created_at: datetime
