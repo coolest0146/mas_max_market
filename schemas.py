@@ -121,7 +121,7 @@ class ProductResponse(BaseModel):
 
 
 class OrderItemCreate(BaseModel):
-    image: int
+    image: str
     name: str
     price: float
     quantity: int
