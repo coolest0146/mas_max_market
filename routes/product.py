@@ -6,7 +6,7 @@ from supabase import create_client, Client
 from models import Product, ProductImage, ProductVariation  # your SQLAlchemy models
 from database_conn import get_db  # your DB session dependency
 from datetime import datetime
-from schemas import ProductCreate, ProductResponse
+from schemas import  ProductResponse
 from sqlalchemy.orm import joinedload
 product = APIRouter(prefix="/products", tags=["Products"])
 
