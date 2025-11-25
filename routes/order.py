@@ -7,6 +7,8 @@ from models import Order, OrderItem
 import oath2
 from schemas import OrderCreate, OrderResponse
 from sqlalchemy.orm import joinedload
+
+from specialschema import OrderSchema
 order = APIRouter(prefix="/orders", tags=["Orders"])
 
 @order.post("/create", response_model=List[OrderResponse])
@@ -67,3 +69,12 @@ def get_products_by_category(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No Orders found for this user")
 
     return Orders
+
+@order.get("/specificorder/{order_id}", response_model=OrderSchema)
+def get_order(order_id: int, db: Session = Depends(get_db)):
+    order = db.query(Order).filter(Order.id == order_id).first()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="No Orders found with such id")
+
+    return order
