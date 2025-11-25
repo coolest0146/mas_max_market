@@ -94,10 +94,48 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
     product = db.query(Product).filter(Product.id == product_id).first()
     return product
 
-@product.get("/allproducts",response_model=List[ProductResponse])
-def get_product(db: Session = Depends(get_db)):
+@product.get("/allproducts", response_model=List[ProductResponse])
+def get_all_products(db: Session = Depends(get_db)):
     products = db.query(Product).all()
-    return products
+
+    formatted_products = []
+
+    for p in products:
+        # primary image
+        primary_image = None
+        for img in p.images:
+            if img.is_primary:
+                primary_image = img.image_url
+                break
+
+        # if no primary image, use first available
+        if not primary_image and p.images:
+            primary_image = p.images[0].image_url
+
+        # variations
+        variations_list = [
+            {
+                "id": v.variation_uuid,
+                "image": v.image_url
+            }
+            for v in p.variations
+        ]
+
+        # build formatted response
+        formatted_products.append({
+            "id": p.id,
+            "name": p.name,
+            "image": primary_image,
+            "rating": {
+                "stars": float(p.rating_stars),
+                "count": p.rating_count
+            },
+            "variation": variations_list,
+            "priceCents": p.price_cents,
+            "keywords": p.keywords or []
+        })
+
+    return formatted_products
 
 
 

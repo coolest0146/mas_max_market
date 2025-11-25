@@ -64,53 +64,30 @@ class CategoryResponse(CategoryCreate):
     class Config:
         orm_mode = True
 
-class ProductOut(BaseModel):
-    id: int
-    name: str
-    slug: str
-    price: float
-    is_active: bool
-    category_id: Optional[int]
-
-    class Config:
-        from_attributes = True
-
-
-
-class ProductImageBase(BaseModel):
-    image_url: str
-    is_primary: bool = False
-    sort_order: int = 0
-
-
-class ProductImageCreate(ProductImageBase):
-    pass
-
-
-class ProductImageResponse(ProductImageBase):
-    id: int
-    created_at: datetime
+class VariationSchema(BaseModel):
+    id: str               # variation_uuid
+    image: str
 
     class Config:
         orm_mode = True
 
 
+class RatingSchema(BaseModel):
+    stars: float
+    count: int
 
-class ProductVariationBase(BaseModel):
-    image_url: str
-
-
-class ProductVariationCreate(ProductVariationBase):
-    pass
-
-class ProductVariationResponse(ProductVariationBase):
-    id: int
-    variation_uuid:str
-    created_at: datetime
+class ProductImageSchema(BaseModel):
+    image: str
 
     class Config:
         orm_mode = True
 
+
+class ProductImageSchema(BaseModel):
+    image: str
+
+    class Config:
+        orm_mode = True
 
 class ProductBase(BaseModel):
     name: str
@@ -129,19 +106,15 @@ class ProductBase(BaseModel):
         orm_mode = True
 
 
-class ProductCreate(ProductBase):
-    category_id: Optional[int] = None
-    images: Optional[List[ProductImageCreate]] = []
-    variations: Optional[List[ProductVariationCreate]] = []
-    
-
-class ProductResponse(ProductBase):
+class ProductResponse(BaseModel):
     id: int
-    category_id: Optional[int]
-    created_at: datetime
-    updated_at: datetime
-    images: List[ProductImageResponse] = []
-    variations: List[ProductVariationResponse] = []
+    name: str
+    image: str
+    rating: RatingSchema
+    variation: List[VariationSchema]
+    priceCents: int
+    keywords: List[str]
+
     class Config:
         orm_mode = True
 
