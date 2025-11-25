@@ -94,7 +94,7 @@ def get_product(product_id: int, db: Session = Depends(get_db)):
     product = db.query(Product).filter(Product.id == product_id).first()
     return product
 
-@product.get("/allproducts")
+@product.get("/allproducts",response_model=List[ProductResponse])
 def get_product(db: Session = Depends(get_db)):
     products = db.query(Product).all()
     return products
