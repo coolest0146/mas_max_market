@@ -5,7 +5,7 @@ from fastapi import APIRouter, FastAPI, UploadFile, File, Form, Depends
 from sqlalchemy.orm import Session
 from supabase import create_client
 from database_conn import get_db
-from models import CNC
+from models import CNC, Dprinting, Pcbdesign
 from schemas import CNCResponse, CNCcreate
 
 SUPABASE_URL = "https://snhcsqjxriwrztyrkejc.supabase.co"
@@ -44,6 +44,110 @@ async def create_cnc(
 
     url = supabase.storage.from_(BUCKET).get_public_url(file_name)
     new_order = CNC(
+            Designunit = "mm",
+            Quantity =Quantity ,
+            Color = "white",
+            Material =Material ,
+            Surface_Finish =Quantity  ,
+
+            Technical_drawing_File =url  ,
+
+            Threads_and_Tapped_holes =str_to_bool(Threads) ,
+            Insert =str_to_bool(Insert) ,
+            Tolerance = str_to_bool(Tolerance),
+
+            Surface_Roughness = Quantity ,
+            PartMarking = Marking, 
+
+            PartAssembly = Assembly,
+            Finished_appearance =Finishing, 
+            Inspection =Inspection 
+        )
+    
+    db.add(new_order)
+    db.commit()
+    db.refresh(new_order)
+    return new_order
+    
+
+@service.post("/printing")
+async def create_cnc(
+    Quantity: str = Form(...),
+    MachineType: str = Form(...),
+    Material: str = Form(...),
+    Insert: str = Form(...),
+    Marking: str = Form(...),
+    Tolerance: str = Form(...),
+    Threads: str = Form(...),
+    Assembly: str = Form(...),
+    Finishing: str = Form(...),
+    Inspection: str = Form(...),
+    file: UploadFile = File(None)
+    ,db=Depends(get_db)
+    ):
+    
+    file_bytes = await file.read()
+    file_name = f"{uuid.uuid4()}_{file.filename}"
+
+    response = supabase.storage.from_(BUCKET).upload(
+        file_name,
+        file_bytes
+    )
+
+    url = supabase.storage.from_(BUCKET).get_public_url(file_name)
+    new_order = Dprinting(
+            Designunit = "mm",
+            Quantity =Quantity ,
+            Color = "white",
+            Material =Material ,
+            Surface_Finish =Quantity  ,
+
+            Technical_drawing_File =url  ,
+
+            Threads_and_Tapped_holes =str_to_bool(Threads) ,
+            Insert =str_to_bool(Insert) ,
+            Tolerance = str_to_bool(Tolerance),
+
+            Surface_Roughness = Quantity ,
+            PartMarking = Marking, 
+
+            PartAssembly = Assembly,
+            Finished_appearance =Finishing, 
+            Inspection =Inspection 
+        )
+    
+    db.add(new_order)
+    db.commit()
+    db.refresh(new_order)
+    return new_order
+    
+
+@service.post("/pcb")
+async def create_cnc(
+    Quantity: str = Form(...),
+    MachineType: str = Form(...),
+    Material: str = Form(...),
+    Insert: str = Form(...),
+    Marking: str = Form(...),
+    Tolerance: str = Form(...),
+    Threads: str = Form(...),
+    Assembly: str = Form(...),
+    Finishing: str = Form(...),
+    Inspection: str = Form(...),
+    file: UploadFile = File(None)
+    ,db=Depends(get_db)
+    ):
+    
+    file_bytes = await file.read()
+    file_name = f"{uuid.uuid4()}_{file.filename}"
+
+    response = supabase.storage.from_(BUCKET).upload(
+        file_name,
+        file_bytes
+    )
+
+    url = supabase.storage.from_(BUCKET).get_public_url(file_name)
+    new_order = Pcbdesign(
             Designunit = "mm",
             Quantity =Quantity ,
             Color = "white",

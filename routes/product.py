@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import APIRouter, FastAPI, HTTPException, UploadFile, File, Form, Depends
+from sqlalchemy import String, or_, text
 from sqlalchemy.orm import Session
 from uuid import uuid4
 from supabase import create_client, Client
@@ -8,6 +9,8 @@ from database_conn import get_db  # your DB session dependency
 from datetime import datetime
 from schemas import  ProductResponse
 from sqlalchemy.orm import joinedload
+
+from special_products import ProductOut, RatingOut, SearchResponse, VariationOut
 product = APIRouter(prefix="/products", tags=["Products"])
 
 SUPABASE_URL = "https://snhcsqjxriwrztyrkejc.supabase.co"
@@ -148,3 +151,52 @@ def get_products_by_category(category_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No products found for this category")
 
     return products
+
+
+@product.get("/search", response_model=SearchResponse)
+def search_products(q: str, db: Session = Depends(get_db)):
+    products = db.query(Product).filter(
+        or_(
+            Product.name.ilike(f"%{q}%"),
+            Product.description.ilike(f"%{q}%"),
+            Product.keywords.cast(String).ilike(f"%{q}%")
+        )
+    ).all()
+
+    formatted = []
+
+    for p in products:
+        # primary image
+        primary_image = None
+        for img in p.images:
+            if img.is_primary:
+                primary_image = img.image_url
+                break
+
+        if not primary_image and p.images:
+            primary_image = p.images[0].image_url
+
+        # variations
+        variations_list = [
+            VariationOut(
+                id=v.variation_uuid,
+                image=v.image_url
+            )
+            for v in p.variations
+        ]
+
+        formatted.append(ProductOut(
+            id=p.id,
+            name=p.name,
+            image=primary_image,
+            rating=RatingOut(
+                stars=float(p.rating_stars),
+                count=p.rating_count
+            ),
+            variation=variations_list,
+            priceCents=p.price_cents,
+            keywords=p.keywords or []
+        ))
+
+    return SearchResponse(results=formatted)
+
