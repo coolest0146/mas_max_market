@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from database_conn import  engine ,get_db
 import models ,schemas ,oath2 
 from pydantic import BaseModel
-from routes import auth, material ,product,category,order, service
+from routes import auth, color, material ,product,category,order, service
 from fastapi.middleware.cors import CORSMiddleware
 # Create the tables in MySQL if not exists
 models.Base.metadata.create_all(bind=engine)
@@ -29,4 +29,5 @@ app.include_router(router=category.Categories)
 app.include_router(router=order.order)
 app.include_router(router=service.service)
 app.include_router(material.materials)
+app.include_router(color.color)
 
