@@ -334,19 +334,24 @@ class Pcbdesign(Base):
     __tablename__ = "Pcb_design"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
+    # Dimensions
+    Size_x = Column(DECIMAL(10, 2), nullable=False)   # mm
+    Size_y = Column(DECIMAL(10, 2), nullable=False)   # mm
+    Quantity = Column(BigInteger, nullable=False)
+    
+    # PCB stackup
+    Layers = Column(Integer, nullable=False)
+    Material = Column(String(40), nullable=False)
+    Color=Column(String(50))
+    Surface_Finish = Column(String(30), nullable=False)
 
     # Board parameters
     # Boardtype = Column(String(30), nullable=False, default="SinglePiece")   # Single, Panel, etc.
     # DifferentDesignInPanel = Column(Integer, nullable=False, default=1)
 
-    # Dimensions
-    Size_x = Column(DECIMAL(10, 2), nullable=False)   # mm
-    Size_y = Column(DECIMAL(10, 2), nullable=False)   # mm
-    Quantity = Column(BigInteger, nullable=False)
 
-    # PCB stackup
-    Layers = Column(Integer, nullable=False)
-    Material = Column(String(40), nullable=False)
+
+ 
 
     # FR4_TG = Column(String(20))                # e.g. TG140, TG170
     # Thermal_conductivity = Column(String(20))  # W/mK
@@ -368,36 +373,31 @@ class Pcbdesign(Base):
     # Edge_Connector = Column(Boolean, default=False)
 
     # Surface finish
-    Surface_Finish = Column(String(30), nullable=False)     # ENIG, HASL, OSP, etc.
+         # ENIG, HASL, OSP, etc.
 
     # Extra notes
     # Special_requirements = Column(String(COMMON_STRING))
-    Color=Column(String(50))
+    
 
 class CNC(Base):
     __tablename__ = "Cnc_machining"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-    
     Designunit = Column(String(20), nullable=False, default="mm")
     Quantity = Column(BigInteger, nullable=False)
-    # Color = Column(String(20), nullable=False, default="Default")
     Material = Column(String(40), nullable=False)
     Surface_Finish = Column(String(40), nullable=False, default="Default")
-
-    Technical_drawing_File = Column(String(COMMON_STRING))  # changed from Boolean
-
-    Threads_and_Tapped_holes = Column(Boolean, default=False)
     Insert = Column(Boolean, default=False)
-    # Tolerance = Column(Boolean, default=False)
-
-    # Surface_Roughness = Column(String(30), nullable=False, default="Default")
-    # PartMarking = Column(String(40), nullable=False)
-
+    Technical_drawing_File = Column(String(COMMON_STRING))  # changed from Boolean
+    Threads_and_Tapped_holes = Column(Boolean, default=False)
     PartAssembly = Column(String(20), default="No")
-    # Finished_appearance = Column(String(20), default="Standard")
     Inspection = Column(String(30), default="Standard")
 
+    # Color = Column(String(20), nullable=False, default="Default")
+    # Tolerance = Column(Boolean, default=False)
+    # Surface_Roughness = Column(String(30), nullable=False, default="Default")
+    # PartMarking = Column(String(40), nullable=False)
+    # Finished_appearance = Column(String(20), default="Standard")
     # Product_description = Column(String(COMMON_STRING))
     # Special_requirements = Column(String(COMMON_STRING))
 
@@ -441,33 +441,25 @@ class Dprinting(Base):
     __tablename__ = "Printing"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
-
     Designunit = Column(String(20), nullable=False, default="mm")
     Quantity = Column(BigInteger, nullable=False)
-    # Color = Column(String(20), nullable=False)
+    Color = Column(String(20), nullable=False)
     Material = Column(String(40), nullable=False)
     Surface_Finish = Column(String(40), nullable=False)
+    PartAssembly = Column(String(20), default="No")
+    Inspection = Column(String(30), default="Standard")
     Technical_drawing_File = Column(String(COMMON_STRING))
+    Insert = Column(Boolean, default=False)
 
     # Welding = Column(Boolean, default=False)
     # Threads_and_Tapped_holes = Column(Boolean, default=False)
-    Insert = Column(Boolean, default=False)
     # Tolerance = Column(Boolean, default=False)
-
     # Surface_Roughness = Column(String(30), nullable=False)
     # PartMarking = Column(String(40), nullable=False)
-
-    PartAssembly = Column(String(20), default="No")
-    Finished_appearance = Column(String(20), default="Standard")
-    Inspection = Column(String(30), default="Standard")
-
     # Product_description = Column(String(COMMON_STRING))
-    
     # Process = Column(String(30), nullable=False)  # SLA, SLS, FDM, etc.
     # Printing_risk = Column(String(COMMON_STRING))
-
     # Special_requirements = Column(String(COMMON_STRING))
-    Color=Column(String(50))
 
 
 # ------------------------------------------------------

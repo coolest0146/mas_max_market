@@ -21,11 +21,8 @@ def str_to_bool(value: str) -> bool:
 @service.post("/cnc")
 async def create_cnc(
     Quantity: str = Form(...),
-    MachineType: str = Form(...),
     Material: str = Form(...),
     Insert: str = Form(...),
-    Marking: str = Form(...),
-    Tolerance: str = Form(...),
     Threads: str = Form(...),
     Assembly: str = Form(...),
     Finishing: str = Form(...),
@@ -46,19 +43,11 @@ async def create_cnc(
     new_order = CNC(
             Designunit = "mm",
             Quantity =Quantity ,
-            Color = "white",
             Material =Material ,
-            Surface_Finish =Quantity  ,
-
+            Surface_Finish =Finishing  ,
             Technical_drawing_File =url  ,
-
             Threads_and_Tapped_holes =str_to_bool(Threads) ,
             Insert =str_to_bool(Insert) ,
-            Tolerance = str_to_bool(Tolerance),
-
-            Surface_Roughness = Quantity ,
-            PartMarking = Marking, 
-
             PartAssembly = Assembly,
             Finished_appearance =Finishing, 
             Inspection =Inspection 
@@ -73,15 +62,12 @@ async def create_cnc(
 @service.post("/printing")
 async def create_cnc(
     Quantity: str = Form(...),
-    MachineType: str = Form(...),
     Material: str = Form(...),
     Insert: str = Form(...),
-    Marking: str = Form(...),
-    Tolerance: str = Form(...),
-    Threads: str = Form(...),
     Assembly: str = Form(...),
     Finishing: str = Form(...),
     Inspection: str = Form(...),
+    Color: str = Form(...),
     file: UploadFile = File(None)
     ,db=Depends(get_db)
     ):
@@ -98,21 +84,12 @@ async def create_cnc(
     new_order = Dprinting(
             Designunit = "mm",
             Quantity =Quantity ,
-            Color = "white",
+            Color = Color,
             Material =Material ,
-            Surface_Finish =Quantity  ,
-
+            Surface_Finish =Finishing  ,
             Technical_drawing_File =url  ,
-
-            Threads_and_Tapped_holes =str_to_bool(Threads) ,
             Insert =str_to_bool(Insert) ,
-            Tolerance = str_to_bool(Tolerance),
-
-            Surface_Roughness = Quantity ,
-            PartMarking = Marking, 
-
             PartAssembly = Assembly,
-            Finished_appearance =Finishing, 
             Inspection =Inspection 
         )
     
@@ -125,12 +102,10 @@ async def create_cnc(
 @service.post("/pcb")
 async def create_cnc(
     Quantity: str = Form(...),
-    MachineType: str = Form(...),
     Material: str = Form(...),
-    Insert: str = Form(...),
-    Marking: str = Form(...),
-    Tolerance: str = Form(...),
-    Threads: str = Form(...),
+    Color: str = Form(...),
+    Sizex: str = Form(...),
+    Sizey:str=Form(...),
     Assembly: str = Form(...),
     Finishing: str = Form(...),
     Inspection: str = Form(...),
@@ -150,22 +125,14 @@ async def create_cnc(
     new_order = Pcbdesign(
             Designunit = "mm",
             Quantity =Quantity ,
-            Color = "white",
+            Color = Color,
             Material =Material ,
-            Surface_Finish =Quantity  ,
-
+            Surface_Finish =Finishing ,
             Technical_drawing_File =url  ,
-
-            Threads_and_Tapped_holes =str_to_bool(Threads) ,
-            Insert =str_to_bool(Insert) ,
-            Tolerance = str_to_bool(Tolerance),
-
-            Surface_Roughness = Quantity ,
-            PartMarking = Marking, 
-
             PartAssembly = Assembly,
-            Finished_appearance =Finishing, 
-            Inspection =Inspection 
+            Inspection =Inspection,
+            Size_x=Sizex,
+            SIze_y=Sizey
         )
     
     db.add(new_order)
