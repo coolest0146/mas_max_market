@@ -1,7 +1,7 @@
 from datetime import datetime
 import uuid
 from sqlalchemy import (
-    Column, String, Integer, BigInteger, DECIMAL, Text, ForeignKey,
+    Column, Float, String, Integer, BigInteger, DECIMAL, Text, ForeignKey,
     DateTime, Enum, Boolean, CHAR,JSON
 )
 from sqlalchemy.orm import relationship, DeclarativeBase
@@ -336,8 +336,8 @@ class Pcbdesign(Base):
     id = Column(BigInteger, primary_key=True, autoincrement=True)
 
     # Board parameters
-    Boardtype = Column(String(30), nullable=False, default="SinglePiece")   # Single, Panel, etc.
-    DifferentDesignInPanel = Column(Integer, nullable=False, default=1)
+    # Boardtype = Column(String(30), nullable=False, default="SinglePiece")   # Single, Panel, etc.
+    # DifferentDesignInPanel = Column(Integer, nullable=False, default=1)
 
     # Dimensions
     Size_x = Column(DECIMAL(10, 2), nullable=False)   # mm
@@ -348,31 +348,31 @@ class Pcbdesign(Base):
     Layers = Column(Integer, nullable=False)
     Material = Column(String(40), nullable=False)
 
-    FR4_TG = Column(String(20))                # e.g. TG140, TG170
-    Thermal_conductivity = Column(String(20))  # W/mK
-    Rogers = Column(String(20))                # e.g. RO4003C
-    Thermoelectric_separation = Column(Boolean, default=False)
+    # FR4_TG = Column(String(20))                # e.g. TG140, TG170
+    # Thermal_conductivity = Column(String(20))  # W/mK
+    # Rogers = Column(String(20))                # e.g. RO4003C
+    # Thermoelectric_separation = Column(Boolean, default=False)
 
-    Thickness = Column(DECIMAL(5, 2), nullable=False)  # board thickness in mm
+    # Thickness = Column(DECIMAL(5, 2), nullable=False)  # board thickness in mm
 
     # Line rules
-    Min_track_spacing = Column(String(20), nullable=False)  # e.g. "4mil"
-    Min_hole = Column(DECIMAL(5, 3), nullable=False)        # drill size
+    # Min_track_spacing = Column(String(20), nullable=False)  # e.g. "4mil"
+    # Min_hole = Column(DECIMAL(5, 3), nullable=False)        # drill size
 
     # Colors
-    Solder_mask = Column(String(20), nullable=False)        # Green, Red, Black...
-    SilkScreen = Column(String(20), nullable=False)         # White, Black
-    UV_printing_multicolor = Column(String(40))             # optional custom print
+    # Solder_mask = Column(String(20), nullable=False)        # Green, Red, Black...
+    # SilkScreen = Column(String(20), nullable=False)         # White, Black
+    # UV_printing_multicolor = Column(String(40))             # optional custom print
 
     # Connectors
-    Edge_Connector = Column(Boolean, default=False)
+    # Edge_Connector = Column(Boolean, default=False)
 
     # Surface finish
     Surface_Finish = Column(String(30), nullable=False)     # ENIG, HASL, OSP, etc.
 
     # Extra notes
-    Special_requirements = Column(String(COMMON_STRING))
-
+    # Special_requirements = Column(String(COMMON_STRING))
+    Color=Column(String(50))
 
 class CNC(Base):
     __tablename__ = "Cnc_machining"
@@ -381,7 +381,7 @@ class CNC(Base):
     
     Designunit = Column(String(20), nullable=False, default="mm")
     Quantity = Column(BigInteger, nullable=False)
-    Color = Column(String(20), nullable=False, default="Default")
+    # Color = Column(String(20), nullable=False, default="Default")
     Material = Column(String(40), nullable=False)
     Surface_Finish = Column(String(40), nullable=False, default="Default")
 
@@ -389,17 +389,17 @@ class CNC(Base):
 
     Threads_and_Tapped_holes = Column(Boolean, default=False)
     Insert = Column(Boolean, default=False)
-    Tolerance = Column(Boolean, default=False)
+    # Tolerance = Column(Boolean, default=False)
 
-    Surface_Roughness = Column(String(30), nullable=False, default="Default")
-    PartMarking = Column(String(40), nullable=False)
+    # Surface_Roughness = Column(String(30), nullable=False, default="Default")
+    # PartMarking = Column(String(40), nullable=False)
 
     PartAssembly = Column(String(20), default="No")
-    Finished_appearance = Column(String(20), default="Standard")
+    # Finished_appearance = Column(String(20), default="Standard")
     Inspection = Column(String(30), default="Standard")
 
-    Product_description = Column(String(COMMON_STRING))
-    Special_requirements = Column(String(COMMON_STRING))
+    # Product_description = Column(String(COMMON_STRING))
+    # Special_requirements = Column(String(COMMON_STRING))
 
 
 # ------------------------------------------------------
@@ -444,29 +444,29 @@ class Dprinting(Base):
 
     Designunit = Column(String(20), nullable=False, default="mm")
     Quantity = Column(BigInteger, nullable=False)
-    Color = Column(String(20), nullable=False)
+    # Color = Column(String(20), nullable=False)
     Material = Column(String(40), nullable=False)
     Surface_Finish = Column(String(40), nullable=False)
     Technical_drawing_File = Column(String(COMMON_STRING))
 
-    Welding = Column(Boolean, default=False)
-    Threads_and_Tapped_holes = Column(Boolean, default=False)
+    # Welding = Column(Boolean, default=False)
+    # Threads_and_Tapped_holes = Column(Boolean, default=False)
     Insert = Column(Boolean, default=False)
-    Tolerance = Column(Boolean, default=False)
+    # Tolerance = Column(Boolean, default=False)
 
-    Surface_Roughness = Column(String(30), nullable=False)
-    PartMarking = Column(String(40), nullable=False)
+    # Surface_Roughness = Column(String(30), nullable=False)
+    # PartMarking = Column(String(40), nullable=False)
 
     PartAssembly = Column(String(20), default="No")
     Finished_appearance = Column(String(20), default="Standard")
     Inspection = Column(String(30), default="Standard")
 
-    Product_description = Column(String(COMMON_STRING))
+    # Product_description = Column(String(COMMON_STRING))
     
-    Process = Column(String(30), nullable=False)  # SLA, SLS, FDM, etc.
-    Printing_risk = Column(String(COMMON_STRING))
+    # Process = Column(String(30), nullable=False)  # SLA, SLS, FDM, etc.
+    # Printing_risk = Column(String(COMMON_STRING))
 
-    Special_requirements = Column(String(COMMON_STRING))
+    # Special_requirements = Column(String(COMMON_STRING))
 
 
 
@@ -503,3 +503,17 @@ class Molding(Base):
     SPI_Finish = Column(String(40))  # Mold finish A1, B1, etc.
 
     Special_requirements = Column(String(COMMON_STRING))
+
+
+class Material(Base):
+    __tablename__ = "materials"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(40), nullable=False)
+    material_type = Column(String(10), nullable=False)  
+    
+    description = Column(String(50), nullable=True)
+    cost_per_unit = Column(Float, nullable=True)
+    unit = Column(String(60), nullable=True)   # kg, meter, sheet, ml, etc.
+
+    created_at = Column(DateTime, default=datetime.now(), nullable=False)
