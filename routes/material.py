@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database_conn import get_db
@@ -29,7 +30,7 @@ def list_all(db: Session = Depends(get_db)):
     return get_materials(db)
 
 
-@materials.get("/{material_type}", response_model=MaterialResponse)
+@materials.get("/{material_type}", response_model=List[MaterialResponse])
 def read(material_type: str, db: Session = Depends(get_db)):
     material = get_material_type(db, material_type)
     if not material:
